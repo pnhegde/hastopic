@@ -59,27 +59,19 @@ int main(int argc, char *argv[])
         qDebug()<<"Can't open";
     }
     QStringList list,stopwords;
-    QHash<QString,int>hash;
 
     QTextStream sw(&fileSW);
     while(!sw.atEnd()) {
         QString line = sw.readLine();
         stopwords += line.split(" ");
     }
-//    QString filePath(argv[1]);
-//    QFile file(filePath);
-//    QTextStream in(&file);
-
-//    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-//        qDebug()<<"Can't open";
-//    }
 
     Nepomuk::Query::Query query;
     query.setLimit(10);
     Nepomuk::Query::Term term;
-    term = Nepomuk::Query::ResourceTypeTerm(Nepomuk::Vocabulary::NFO::PaginatedTextDocument()) ||
+    term = Nepomuk::Query::ResourceTypeTerm(Nepomuk::Vocabulary::NFO::TextDocument()) ||
                                                           Nepomuk::Query::ComparisonTerm(Nepomuk::Vocabulary::NIE::mimeType(),
-                                                                       Nepomuk::Query::LiteralTerm(QLatin1String("application/pdf")));
+                                                                       Nepomuk::Query::LiteralTerm(QLatin1String("text/plain")));
     query.setTerm(term);
     QList<Nepomuk::Query::Result>results = Nepomuk::Query::QueryServiceClient::syncQuery( query );
 
@@ -88,6 +80,7 @@ int main(int argc, char *argv[])
             Nepomuk::Variant v = result.resource().property(Nepomuk::Vocabulary::NIE::plainTextContent());
             QString line = v.toString();
             list = line.split(" ");
+            QHash<QString,int>hash;
             foreach(QString str,list) {
                 if(!stopwords.contains(str)) {
                     if(hash.value(str))
@@ -97,10 +90,10 @@ int main(int argc, char *argv[])
                 }
             }
 
-            QHashIterator<QString, int> l(hash);
-            while (l.hasNext()) {
-                l.next();
-            }
+//            QHashIterator<QString, int> l(hash);
+//            while (l.hasNext()) {
+//                l.next();
+//            }
 
             QList<int> vals = hash.values();
             QSet<int>set = vals.toSet();
